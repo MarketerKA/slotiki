@@ -15,27 +15,28 @@ const ScrollingMarquee = () => {
 
   useEffect(() => {
     let interval;
-
+  
     if (isSpinning) {
       let currentPosition = scrollPosition;
       interval = setInterval(() => {
         currentPosition += 80; // Двигаем ленту на 80px (ширина одного символа)
         setScrollPosition(currentPosition);
-
+  
         // Останавливаем вращение через 5 секунд
-        if (currentPosition >= scrollPosition + 1200) { // Останавливаем после 15 символов (5 секунд плавного вращения)
+        if (currentPosition >= scrollPosition + 1200) {
           clearInterval(interval);
           setIsSpinning(false);
-
+  
           // Выбираем символ под стрелкой
           const selectedIndex = Math.floor((currentPosition % (randomSymbols.length * 80)) / 80);
           setSelectedSymbol(randomSymbols[selectedIndex]);
         }
       }, 200); // Меняем символы каждые 200 мс для плавного движения
     }
-
+  
     return () => clearInterval(interval);
-  }, [isSpinning]);
+  }, [isSpinning, scrollPosition, randomSymbols]); // Добавьте randomSymbols и scrollPosition в зависимости
+  
 
   const startSpin = () => {
     setScrollPosition(0); // Сбрасываем позицию в начало
