@@ -12,34 +12,45 @@ const ScrollingMarquee = () => {
   const [scrollPosition, setScrollPosition] = useState(0); // Позиция для ленты
   const [isSpinning, setIsSpinning] = useState(false); // Управление вращением
   const [selectedSymbol, setSelectedSymbol] = useState(null); // Выбранный символ
+  const [speed, setSpeed] = useState(80); // Начальная скорость
+  const [elapsedTime, setElapsedTime] = useState(0); // Прошедшее время
 
   useEffect(() => {
     let interval;
-  
+    let maxDuration = 5000; // Общее время вращения - 5 секунд
+    let currentPosition = scrollPosition;
+    let initialSpeed = speed; // Начальная скорость вращения
+
     if (isSpinning) {
-      let currentPosition = scrollPosition;
       interval = setInterval(() => {
-        currentPosition += 80; // Двигаем ленту на 80px (ширина одного символа)
+        currentPosition += initialSpeed; // Двигаем ленту на currentSpeed пикселей
         setScrollPosition(currentPosition);
-  
-        // Останавливаем вращение через 5 секунд
-        if (currentPosition >= scrollPosition + 1200) {
+
+        setElapsedTime(prevTime => prevTime + 200); // Обновляем прошедшее время
+
+        // Если прошло больше 5 секунд, останавливаем вращение
+        if (elapsedTime >= maxDuration) {
           clearInterval(interval);
           setIsSpinning(false);
-  
+
           // Выбираем символ под стрелкой
           const selectedIndex = Math.floor((currentPosition % (randomSymbols.length * 80)) / 80);
           setSelectedSymbol(randomSymbols[selectedIndex]);
+        } else {
+          // Плавное замедление
+          let speedDecrease = (maxDuration - elapsedTime) / maxDuration; // Меньше скорость по мере приближения к концу
+          initialSpeed = speedDecrease * 80; // Замедляем ленту
         }
       }, 200); // Меняем символы каждые 200 мс для плавного движения
     }
-  
+
     return () => clearInterval(interval);
-  }, [isSpinning, scrollPosition, randomSymbols]); // Добавьте randomSymbols и scrollPosition в зависимости
-  
+  }, [isSpinning, elapsedTime, scrollPosition, randomSymbols, speed]);
 
   const startSpin = () => {
     setScrollPosition(0); // Сбрасываем позицию в начало
+    setSpeed(80); // Сбрасываем скорость
+    setElapsedTime(0); // Сбрасываем прошедшее время
     setIsSpinning(true);
     setSelectedSymbol(null); // Сбрасываем предыдущий выбранный символ
   };
@@ -61,7 +72,6 @@ const ScrollingMarquee = () => {
       {/* Отображение выпавшего элемента */}
       {selectedSymbol && (
         <div style={styles.result}>
-          
         </div>
       )}
 
